@@ -1,0 +1,50 @@
+# =========================================================================
+# Angular .gitignore
+# =========================================================================
+
+# Dependencies
+node_modules/
+
+# Angular cache and build outputs
+/.angular/
+/dist/
+/out-tsc/
+/bazel-out/
+
+# Environment configurations (including secret variables)
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+.env.staging
+.env.development.local
+.env.test.local
+.env.production.local
+.env.staging.local
+
+# IDEs and editors configuration
+.vscode/
+.idea/
+*.suo
+*.ntvsca*
+*.njsproj
+*.sln
+*.sw?
+.project
+.classpath
+.settings/
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# System files (OS Specific)
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
