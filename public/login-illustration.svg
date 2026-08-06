@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" fill="none" width="100%" height="100%">
+  <!-- Definitions for Gradients and Filters -->
+  <defs>
+    <!-- Soft Background Glow -->
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="0%" stop-color="#356C8C" stop-opacity="0.08" />
+      <stop offset="100%" stop-color="#F7F9FC" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Main Gradient for Accents -->
+    <linearGradient id="primaryGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#234A61" />
+      <stop offset="50%" stop-color="#356C8C" />
+      <stop offset="100%" stop-color="#6FA8C7" />
+    </linearGradient>
+
+    <!-- Accent Gradient (Lighter, for connection paths) -->
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#356C8C" stop-opacity="0.6" />
+      <stop offset="100%" stop-color="#356C8C" stop-opacity="0.1" />
+    </linearGradient>
+    
+    <!-- Soft Shadow for Floating Element -->
+    <filter id="dropShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="16" stdDeviation="12" flood-color="#234A61" flood-opacity="0.12" />
+    </filter>
+  </defs>
+
+  <!-- Background Aura -->
+  <circle cx="400" cy="400" r="350" fill="url(#bgGlow)" />
+
+  <!-- 1. The Global Connection Circles (Stylized Globe / Opportunities) -->
+  <g stroke="#356C8C" stroke-width="1.5" stroke-opacity="0.25">
+    <!-- Globe outline -->
+    <circle cx="400" cy="400" r="220" />
+    <circle cx="400" cy="400" r="220" stroke-dasharray="8 6" />
+    
+    <!-- Longitude / Latitude arcs representing global discovery -->
+    <path d="M180 400C180 400 300 280 400 280C500 280 620 400 620 400" />
+    <path d="M180 400C180 400 300 520 400 520C500 520 620 400 620 400" />
+    <path d="M400 180C400 180 320 300 320 400C320 500 400 620 400 620" />
+    <path d="M400 180C400 180 480 300 480 400C480 500 400 620 400 620" />
+  </g>
+
+  <!-- 2. Connection Network / Nodes (Communication, Opportunities) -->
+  <g>
+    <!-- Connection lines -->
+    <line x1="280" y1="280" x2="400" y2="200" stroke="url(#accentGrad)" stroke-width="2" />
+    <line x1="400" y1="200" x2="520" y2="280" stroke="url(#accentGrad)" stroke-width="2" />
+    <line x1="520" y1="280" x2="580" y2="420" stroke="url(#accentGrad)" stroke-width="2" />
+    <line x1="280" y1="280" x2="220" y2="420" stroke="url(#accentGrad)" stroke-width="2" />
+    <line x1="220" y1="420" x2="300" y2="560" stroke="url(#accentGrad)" stroke-width="2" />
+    <line x1="580" y1="420" x2="500" y2="560" stroke="url(#accentGrad)" stroke-width="2" />
+    
+    <!-- Communication Nodes (Circles) -->
+    <circle cx="280" cy="280" r="8" fill="#356C8C" />
+    <circle cx="280" cy="280" r="16" stroke="#356C8C" stroke-width="1.5" stroke-opacity="0.3" />
+    
+    <circle cx="400" cy="200" r="6" fill="#356C8C" />
+    <circle cx="400" cy="200" r="12" stroke="#356C8C" stroke-width="1" stroke-opacity="0.3" />
+
+    <circle cx="520" cy="280" r="10" fill="#356C8C" />
+    <circle cx="520" cy="280" r="20" stroke="#356C8C" stroke-width="1.5" stroke-opacity="0.3" />
+
+    <circle cx="220" cy="420" r="7" fill="#356C8C" />
+    
+    <circle cx="580" cy="420" r="9" fill="#356C8C" />
+    <circle cx="580" cy="420" r="18" stroke="#356C8C" stroke-width="1.5" stroke-opacity="0.3" />
+    
+    <circle cx="300" cy="560" r="8" fill="#356C8C" />
+    <circle cx="500" cy="560" r="6" fill="#356C8C" />
+  </g>
+
+  <!-- 3. Rising / Growth Path (Learning and Discovery) -->
+  <g>
+    <!-- Dotted curve representing journey -->
+    <path d="M250 600 C 300 580, 320 480, 420 420 C 520 360, 580 300, 620 220" 
+          stroke="#356C8C" stroke-width="2.5" stroke-dasharray="6 8" stroke-linecap="round" opacity="0.6"/>
+  </g>
+
+  <!-- 4. Floating Stylized "Origami" Delta / Opportunities Plane (Voyage & Discovery) -->
+  <g transform="translate(420, 300) rotate(-15)" filter="url(#dropShadow)">
+    <!-- Right Wing -->
+    <path d="M 0 0 L 120 -40 L 70 80 Z" fill="url(#primaryGrad)" />
+    <!-- Left Wing (shaded) -->
+    <path d="M 0 0 L 70 80 L 10 50 Z" fill="#234A61" opacity="0.85" />
+    <!-- Center Crease -->
+    <path d="M 0 0 L 120 -40 L 70 80 Z" stroke="#FFFFFF" stroke-width="0.75" opacity="0.3" />
+  </g>
+
+  <!-- 5. Surrounding sparkles / opportunities (Minimalist Linear Stars) -->
+  <g stroke="#356C8C" stroke-width="2" stroke-linecap="round" opacity="0.7">
+    <!-- Star 1 (Top Right) -->
+    <path d="M 640 150 L 640 162" />
+    <path d="M 634 156 L 646 156" />
+    <circle cx="640" cy="156" r="2" fill="#356C8C" stroke="none" />
+    
+    <!-- Star 2 (Middle Left) -->
+    <path d="M 160 320 L 160 328" />
+    <path d="M 156 324 L 164 324" />
+
+    <!-- Star 3 (Bottom Right) -->
+    <path d="M 580 620 L 580 630" />
+    <path d="M 575 625 L 585 625" />
+  </g>
+
+  <!-- 6. Stylized rising bars / growth indicator (very subtle, Notion/Linear style) -->
+  <g fill="#356C8C" opacity="0.15" transform="translate(190, 480)">
+    <rect x="0" y="40" width="8" height="20" rx="4" />
+    <rect x="16" y="25" width="8" height="35" rx="4" />
+    <rect x="32" y="10" width="8" height="50" rx="4" />
+    <rect x="48" y="0" width="8" height="60" rx="4" />
+  </g>
+</svg>
