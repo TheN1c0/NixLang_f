@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -7,19 +8,23 @@ export const routes: Routes = [
   },
   {
     path: 'lessons',
-    loadChildren: () => import('./features/lessons/lessons.routes').then(m => m.LESSONS_ROUTES)
+    loadChildren: () => import('./features/lessons/lessons.routes').then(m => m.LESSONS_ROUTES),
+    canActivate: [authGuard]
   },
   {
     path: 'exercises',
-    loadChildren: () => import('./features/exercises/exercises.routes').then(m => m.EXERCISES_ROUTES)
+    loadChildren: () => import('./features/exercises/exercises.routes').then(m => m.EXERCISES_ROUTES),
+    canActivate: [authGuard]
   },
   {
     path: 'progress',
-    loadChildren: () => import('./features/progress/progress.routes').then(m => m.PROGRESS_ROUTES)
+    loadChildren: () => import('./features/progress/progress.routes').then(m => m.PROGRESS_ROUTES),
+    canActivate: [authGuard]
   },
   {
     path: 'admin',
-    loadChildren: () => import('./features/admin/admin.routes').then(m => m.ADMIN_ROUTES)
+    loadChildren: () => import('./features/admin/admin.routes').then(m => m.ADMIN_ROUTES),
+    canActivate: [authGuard]
   },
   {
     path: '',

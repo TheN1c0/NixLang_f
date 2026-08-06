@@ -1,4 +1,4 @@
 export const environment = {
-  production: true,
-  apiUrl: 'https://api.nixlang.com/api'
+  production: false,
+  apiUrl: 'http://localhost:5204/api'
 };

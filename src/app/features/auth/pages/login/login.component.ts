@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -13,6 +14,7 @@ import { Router } from '@angular/router';
 export class LoginPageComponent {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
 
   // Form Definition
   readonly loginForm: FormGroup = this.fb.group({
@@ -49,21 +51,25 @@ export class LoginPageComponent {
 
     this.loading.set(true);
 
-    // Simulate API authentication call
-    setTimeout(() => {
-      const emailValue = this.loginForm.value.email;
-      const passwordValue = this.loginForm.value.password;
+    const emailValue = this.loginForm.value.email;
+    const passwordValue = this.loginForm.value.password;
 
-      // Mock validation matching common test cases
-      if (emailValue === 'demo@nixlang.com' && passwordValue === 'password123') {
+    this.authService.login(emailValue, passwordValue).subscribe({
+      next: () => {
         this.loading.set(false);
-        // Successful path: would redirect to catalog
-        alert('¡Inicio de sesión exitoso!');
-      } else {
+        // Delegate navigation to the component upon successful login
+        this.router.navigate(['/lessons']);
+      },
+      error: (err) => {
         this.loading.set(false);
-        // Prevents account enumeration by using generic error message (RN-04/Security rule)
-        this.errorMessage.set('Credenciales inválidas. Por favor, intenta de nuevo.');
+        if (err.status === 401) {
+          // Genera un error genérico (Username Enumeration Prevention)
+          this.errorMessage.set('Credenciales inválidas. Por favor, intenta de nuevo.');
+        } else {
+          // Error de conexión o de servidor
+          this.errorMessage.set('Error de conexión. No se pudo establecer comunicación con el servidor.');
+        }
       }
-    }, 1200);
+    });
   }
 }
