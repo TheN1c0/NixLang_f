@@ -1,0 +1,74 @@
+<div class="layout-wrapper">
+  
+  <!-- Global Top Header -->
+  <header class="app-header" role="banner">
+    <div class="header-content">
+      
+      <!-- Brand Area -->
+      <div class="logo-area" routerLink="/lessons" style="cursor: pointer;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" class="brand-logo" aria-hidden="true">
+          <circle cx="24" cy="24" r="22" stroke="var(--color-primary)" stroke-width="4" />
+          <path d="M16 32V16L24 24L32 16V32" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span class="logo-text">NixLang</span>
+      </div>
+
+      <!-- Navigation Menu -->
+      <nav class="app-nav" aria-label="Navegación principal">
+        <a routerLink="/lessons" routerLinkActive="active" class="nav-item">Lecciones</a>
+      </nav>
+
+      <!-- Profile & Settings Area -->
+      <div class="profile-container">
+        @if (userService.profile(); as user) {
+          <button 
+            class="profile-trigger" 
+            (click)="toggleProfileMenu()"
+            [attr.aria-expanded]="profileMenuOpen()"
+            aria-haspopup="true"
+            aria-label="Menú de usuario">
+            <span class="avatar-circle" aria-hidden="true">
+              {{ user.fullName.charAt(0).toUpperCase() }}
+            </span>
+            <span class="profile-name">{{ user.fullName }}</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" class="chevron-icon" aria-hidden="true">
+              <path d="M480-344 240-584h480L480-344Z"/>
+            </svg>
+          </button>
+
+          <!-- Dropdown Dropmenu -->
+          @if (profileMenuOpen()) {
+            <div class="profile-dropdown" role="menu">
+              <div class="dropdown-header">
+                <p class="user-fullname">{{ user.fullName }}</p>
+                <p class="user-email">{{ user.email }}</p>
+              </div>
+              <div class="dropdown-divider" role="separator"></div>
+              <button class="dropdown-item logout-btn" (click)="logout()" role="menuitem">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" class="logout-icon" aria-hidden="true">
+                  <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm384-244-56-56 102-102H360v-80h270L528-708l56-56 200 200-200 200Z"/>
+                </svg>
+                <span>Cerrar sesión</span>
+              </button>
+            </div>
+          }
+        } @else {
+          <!-- Profile Shimmer Loader -->
+          <div class="profile-shimmer" aria-hidden="true">
+            <div class="shimmer-circle"></div>
+            <div class="shimmer-text"></div>
+          </div>
+        }
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Page View Outlet -->
+  <main class="app-main-content">
+    <div class="content-container">
+      <router-outlet />
+    </div>
+  </main>
+
+</div>

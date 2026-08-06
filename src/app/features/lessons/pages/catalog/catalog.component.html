@@ -1,0 +1,77 @@
+<div class="catalog-page">
+  
+  <!-- Welcome Banner -->
+  <section class="catalog-header" aria-labelledby="catalog-title">
+    <h1 id="catalog-title" class="welcome-title">
+      ¡Hola, {{ userService.profile()?.fullName || 'Estudiante' }}!
+    </h1>
+    <p class="welcome-subtitle">Aprende inglés a tu propio ritmo, sin estrés y de forma interactiva.</p>
+  </section>
+
+  <!-- Filter & Search Controls Bar -->
+  <div class="filters-bar">
+    
+    <!-- Search Bar -->
+    <div class="search-box">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" class="search-icon" aria-hidden="true">
+        <path d="M784-120 532-372q-30 24-74 38t-90 14q-117 0-198.5-81.5T88-600q0-117 81.5-198.5T368-880q117 0 198.5 81.5T648-600q0 49-14 89t-38 75l272 252-84 84ZM368-292q128 0 218-90t90-218q0-128-90-218t-218-90q-128 0-218 90t-90 218q0 128 90 218t218 90Z"/>
+      </svg>
+      <input 
+        type="search" 
+        [value]="searchQuery()" 
+        (input)="onSearch($event)" 
+        placeholder="Buscar lecciones por título o descripción..." 
+        aria-label="Buscar lecciones" />
+    </div>
+
+    <!-- CEFR Level Filters -->
+    <div class="level-pills" role="group" aria-label="Filtrar por nivel MCER">
+      @for (level of levels; track level) {
+        <button 
+          class="level-pill" 
+          [class.pill-active]="selectedLevel() === level"
+          (click)="selectLevel(level)"
+          type="button">
+          {{ level === 'Todos' ? 'Todos los niveles' : 'Nivel ' + level }}
+        </button>
+      }
+    </div>
+
+  </div>
+
+  <!-- Loading State Shimmer Grid -->
+  @if (loading()) {
+    <div class="shimmer-grid" aria-hidden="true">
+      <div class="shimmer-card"></div>
+      <div class="shimmer-card"></div>
+      <div class="shimmer-card"></div>
+    </div>
+  } @else {
+    
+    <!-- Empty State -->
+    @if (lessons().length === 0) {
+      <div class="empty-state">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="empty-icon" aria-hidden="true">
+          <circle cx="480" cy="-480" r="280" />
+          <path d="M480 -600 L480 -400 M480 -320 L482 -320" stroke-width="8" />
+        </svg>
+        <h2 class="empty-title">No encontramos lecciones</h2>
+        <p class="empty-text">Intenta ajustar tu búsqueda o seleccionar otro nivel mcer.</p>
+      </div>
+    } @else {
+      
+      <!-- Lessons Grid -->
+      <div class="lessons-grid">
+        @for (lesson of lessons(); track lesson.id) {
+          <app-lesson-card 
+            [lesson]="lesson"
+            (start)="handleStart($event)"
+            (toggleFavorite)="handleToggleFavorite($event)" />
+        }
+      </div>
+
+    }
+
+  }
+
+</div>
