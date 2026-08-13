@@ -27,17 +27,22 @@ export class AdminLessonsComponent implements OnInit {
   readonly totalCount = signal(0);
   readonly totalPages = signal(0);
 
-  // Computed KPIs based on current loaded items (for demonstration / live stats)
+  // Computed KPIs based on database
   readonly kpiTotalLessons = computed(() => this.totalCount());
-  
-  // We can count items in the current page or fetch stats. Let's use fallback totals
-  readonly publishedCount = signal(96);
-  readonly draftCount = signal(32);
-  readonly exercisesTotal = signal(1842);
-  readonly viewsCount = '24.7K';
+  readonly exercisesTotal = signal(0);
 
   ngOnInit(): void {
     this.loadLessons();
+    this.loadExercisesCount();
+  }
+
+  loadExercisesCount(): void {
+    this.adminService.getExercises(1, 1).subscribe({
+      next: (res) => {
+        this.exercisesTotal.set(res.totalCount || 0);
+      },
+      error: (err) => console.error('Failed to load exercises total count for KPI', err)
+    });
   }
 
   loadLessons(): void {
@@ -48,15 +53,6 @@ export class AdminLessonsComponent implements OnInit {
         this.lessons.set(res.items || []);
         this.totalCount.set(res.totalCount || 0);
         this.totalPages.set(res.totalPages || 0);
-        
-        // Update draft and published dynamic calculation if possible
-        if (res.totalCount > 0) {
-          // Adjust published/draft mock split proportionally
-          const total = res.totalCount;
-          const pub = Math.round(total * 0.75);
-          this.publishedCount.set(pub);
-          this.draftCount.set(total - pub);
-        }
         this.loading.set(false);
       },
       error: (err) => {
