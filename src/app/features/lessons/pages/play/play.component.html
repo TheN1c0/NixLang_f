@@ -1,0 +1,109 @@
+<div class="play-page-container">
+
+  <!-- 1. LOADING STATE -->
+  @if (isLoading()) {
+    <div class="loading-state" aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
+      <p class="loading-text">Cargando lección...</p>
+    </div>
+  }
+
+  <!-- 2. ERROR STATE -->
+  @else if (errorMessage(); as msg) {
+    <div class="error-state" aria-live="assertive">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" class="error-icon" aria-hidden="true">
+        <path d="M480-280q17 0 28.5-11.5T520-320q0-17-11.5-28.5T480-360q-17 0-28.5 11.5T440-320q0 17 11.5 28.5T480-280Zm-40-160h80v-240h-80v240Zm40 360q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80ZM200-200l560-560v560H200Z"/>
+      </svg>
+      <h2 class="error-title">¡Ups! Algo salió mal</h2>
+      <p class="error-msg">{{ msg }}</p>
+      <button class="retry-btn" (click)="retry()">Reintentar</button>
+    </div>
+  }
+
+  <!-- 3. COMPLETED RESULTS STATE -->
+  @else if (isCompleted()) {
+    <div class="completed-state">
+      <div class="results-card">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" class="congrats-icon" aria-hidden="true">
+          <circle cx="50" cy="50" r="45" stroke="var(--color-primary-light)" stroke-width="5" />
+          <path d="M30 50L45 65L70 35" stroke="var(--color-primary)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <h2 class="results-title">¡Lección completada!</h2>
+        <p class="results-desc">Has recorrido todos los bloques de contenido y respondido los ejercicios.</p>
+
+        <div class="score-summary">
+          <div class="score-item">
+            <span class="score-label">Ejercicios Resueltos</span>
+            <span class="score-val">{{ totalAciertos }} / {{ totalEjercicios }}</span>
+          </div>
+          <div class="score-item">
+            <span class="score-label">Porcentaje de Aciertos</span>
+            <span class="score-val">{{ porcentajeGeneral }}%</span>
+          </div>
+        </div>
+
+        <button class="finish-btn" routerLink="/lessons">Volver al catálogo</button>
+      </div>
+    </div>
+  }
+
+  <!-- 4. ACTIVE LESSON CONTENT PLAYING -->
+  @else if (lessonDetail(); as detail) {
+    <div class="play-content-wrapper">
+      
+      <!-- Top header bar: Title, Exit, and Progress -->
+      <header class="play-header">
+        <div class="header-top-row">
+          <h1 class="lesson-title">{{ detail.title }}</h1>
+          <button class="exit-btn" routerLink="/lessons" aria-label="Salir al catálogo">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" class="exit-icon" aria-hidden="true">
+              <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/>
+            </svg>
+          </button>
+        </div>
+        
+        <!-- Progress bar visual indicator -->
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" [style.width.%]="((activeBlockIndex() + 1) / detail.lessonBlocks.length) * 100"></div>
+        </div>
+        <div class="progress-label">
+          Paso {{ activeBlockIndex() + 1 }} de {{ detail.lessonBlocks.length }}
+        </div>
+      </header>
+
+      <!-- Central block viewport -->
+      <main class="block-viewport">
+        @let activeBlock = detail.lessonBlocks[activeBlockIndex()];
+        <app-lesson-block-renderer 
+          [block]="activeBlock"
+          [result]="activeBlock.exercise ? exerciseResults()[activeBlock.exercise.id] : undefined"
+          (exerciseResult)="handleExerciseResult(activeBlock.exercise!.id, $event)" />
+      </main>
+
+      <!-- Bottom navigation controls footer -->
+      <footer class="play-footer">
+        <button 
+          class="nav-btn prev-btn" 
+          [disabled]="activeBlockIndex() === 0" 
+          (click)="prev()">
+          Anterior
+        </button>
+
+        @if (activeBlock.type === 'Exercise' && activeBlock.exercise && !exerciseResults()[activeBlock.exercise.id]) {
+          <!-- Disabled placeholder when exercise is not answered yet -->
+          <button class="nav-btn next-btn disabled-btn" disabled>
+            Siguiente
+          </button>
+        } @else {
+          <button 
+            class="nav-btn next-btn" 
+            (click)="next()">
+            {{ activeBlockIndex() === detail.lessonBlocks.length - 1 ? 'Finalizar' : 'Siguiente' }}
+          </button>
+        }
+      </footer>
+
+    </div>
+  }
+
+</div>

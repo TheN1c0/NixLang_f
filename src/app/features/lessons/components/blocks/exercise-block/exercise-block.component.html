@@ -1,0 +1,112 @@
+<div class="exercise-card">
+
+  <!-- Exercise Header -->
+  <div class="exercise-header">
+    <span class="exercise-badge">EJERCICIO</span>
+    <p class="exercise-statement">{{ exercise.statement }}</p>
+  </div>
+
+  <!-- Exercise Body Inputs -->
+  <div class="exercise-body">
+    
+    <!-- 1. MULTIPLE CHOICE INTERFACE -->
+    @if (exercise.type === 'MultipleChoice') {
+      <div class="alternatives-list" role="radiogroup" aria-label="Selecciona la respuesta correcta">
+        @for (option of exercise.options; track option.id) {
+          
+          @if (result) {
+            <!-- Solved state rendering -->
+            <button 
+              type="button"
+              class="alt-btn"
+              [class.alt-correct]="option.text === exercise.correctAnswer"
+              [class.alt-incorrect]="option.text === result.givenAnswer && !result.isCorrect"
+              [class.alt-selected]="option.text === result.givenAnswer"
+              disabled>
+              {{ option.text }}
+            </button>
+          } @else {
+            <!-- Active state rendering -->
+            <button 
+              type="button"
+              class="alt-btn alt-active"
+              [class.alt-selected]="option.text === selectedOption()"
+              (click)="selectOption(option.text)">
+              {{ option.text }}
+            </button>
+          }
+
+        }
+      </div>
+    }
+
+    <!-- 2. TRANSLATION INTERFACE -->
+    @else if (exercise.type === 'Translation') {
+      <div class="translation-box">
+        @if (result) {
+          <input 
+            type="text" 
+            class="translation-input"
+            [class.input-correct]="result.isCorrect"
+            [class.input-incorrect]="!result.isCorrect"
+            [value]="result.givenAnswer"
+            disabled />
+        } @else {
+          <input 
+            type="text" 
+            class="translation-input input-active"
+            [value]="translationAnswer()"
+            (input)="onTextChange($event)"
+            placeholder="Escribe tu respuesta en inglés..."
+            (keyup.enter)="verify()"
+            aria-label="Respuesta de traducción" />
+        }
+      </div>
+    }
+
+  </div>
+
+  <!-- Verification & Feedback Panel -->
+  <div class="exercise-footer">
+    
+    @if (result) {
+      
+      <!-- Resolved Feedback Banner -->
+      @if (result.isCorrect) {
+        <div class="feedback-banner feedback-success" role="alert">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" class="feedback-icon" aria-hidden="true">
+            <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z"/>
+          </svg>
+          <div>
+            <p class="feedback-title">¡Excelente! Respuesta correcta</p>
+            <p class="feedback-text">Buen trabajo al identificar la estructura adecuada.</p>
+          </div>
+        </div>
+      } @else {
+        <div class="feedback-banner feedback-fail" role="alert">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" class="feedback-icon" aria-hidden="true">
+            <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/>
+          </svg>
+          <div>
+            <p class="feedback-title">Respuesta incorrecta</p>
+            <p class="feedback-text">La respuesta correcta es: <strong class="correct-highlight">{{ exercise.correctAnswer }}</strong></p>
+          </div>
+        </div>
+      }
+
+    } @else {
+
+      <!-- Active Check Button -->
+      <button 
+        type="button"
+        class="verify-btn"
+        [disabled]="!canVerify"
+        (click)="verify()">
+        Comprobar respuesta
+      </button>
+
+    }
+
+  </div>
+
+</div>

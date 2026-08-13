@@ -2,6 +2,7 @@ import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { UserProfile } from '../models/user.model';
 import { environment } from '../../../environments/environment';
+import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 @Injectable({
@@ -37,5 +38,33 @@ export class UserService {
    */
   clearProfile(): void {
     this.profile.set(null);
+  }
+
+  /**
+   * Updates user profile details on the server and synchronizes the local cached profile signal.
+   */
+  updateProfile(
+    fullName: string, 
+    email: string, 
+    currentPassword?: string, 
+    newPassword?: string
+  ): Observable<{ success: boolean }> {
+    return this.http.put<{ success: boolean }>(`${environment.apiUrl}/profile`, {
+      fullName,
+      email,
+      currentPassword,
+      newPassword
+    }).pipe(
+      tap(() => {
+        const current = this.profile();
+        if (current) {
+          this.profile.set({
+            ...current,
+            fullName,
+            email
+          });
+        }
+      })
+    );
   }
 }

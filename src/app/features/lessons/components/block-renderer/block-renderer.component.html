@@ -1,0 +1,21 @@
+<div class="block-renderer-container">
+  @switch (block.type) {
+    @case ('Heading') {
+      <app-heading-block [text]="block.configurationValue" />
+    }
+    @case ('Paragraph') {
+      <app-paragraph-block [text]="block.configurationValue" />
+    }
+    @case ('Summary') {
+      <app-summary-block [text]="block.configurationValue" />
+    }
+    @case ('Exercise') {
+      @if (block.exercise) {
+        <app-exercise-block 
+          [exercise]="block.exercise" 
+          [result]="result"
+          (answered)="handleExerciseAnswered($event)" />
+      }
+    }
+  }
+</div>

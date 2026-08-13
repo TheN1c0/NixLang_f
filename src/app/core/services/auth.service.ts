@@ -2,7 +2,7 @@ import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { LoginResponse } from '../models/auth.model';
+import { LoginResponse, RegisterResponse } from '../models/auth.model';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -42,6 +42,17 @@ export class AuthService {
         localStorage.setItem(this.storageKey, JSON.stringify(res));
       })
     );
+  }
+
+  /**
+   * Performs user registration request to NixLang API
+   */
+  register(fullName: string, email: string, password: string): Observable<RegisterResponse> {
+    return this.http.post<RegisterResponse>(`${environment.apiUrl}/auth/register`, {
+      fullName,
+      email,
+      password
+    });
   }
 
   /**

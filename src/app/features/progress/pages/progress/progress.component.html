@@ -1,0 +1,192 @@
+<div class="progress-container">
+  
+  <header class="progress-header">
+    <h1 class="page-title">Tu Progreso y Configuración</h1>
+    <p class="page-subtitle">Sigue tu aprendizaje e interactúa con tu cuenta de NixLang.</p>
+  </header>
+
+  @if (isLoading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Cargando tu progreso e historial...</p>
+    </div>
+  }
+
+  @else {
+    
+    <div class="dashboard-grid">
+      
+      <!-- LEFT COLUMN: STATS AND HISTORY -->
+      <section class="stats-section">
+        
+        <!-- Summary Cards -->
+        @if (stats(); as userStats) {
+          <div class="stats-cards-row">
+            
+            <div class="stat-card">
+              <span class="stat-num">{{ userStats.lessonsCompleted }}</span>
+              <span class="stat-label">Completadas</span>
+            </div>
+
+            <div class="stat-card">
+              <span class="stat-num">{{ userStats.lessonsInProgress }}</span>
+              <span class="stat-label">En Progreso</span>
+            </div>
+
+            <div class="stat-card">
+              <span class="stat-num">{{ userStats.favoritesCount }}</span>
+              <span class="stat-label">Favoritos</span>
+            </div>
+
+          </div>
+        }
+
+        <!-- Lessons History List -->
+        <div class="history-box">
+          <h2 class="section-title">Historial de Lecciones</h2>
+          
+          @if (progressList().length === 0) {
+            <div class="empty-history">
+              <p>Aún no has iniciado ninguna lección.</p>
+              <button class="go-catalog-btn" routerLink="/lessons">Ver Catálogo</button>
+            </div>
+          } @else {
+            <div class="history-list">
+              @for (item of progressList(); track item.lessonId) {
+                <div class="history-item-card">
+                  <div class="item-main-row">
+                    <div>
+                      <h3 class="item-title">{{ item.lessonTitle }}</h3>
+                      <span class="level-badge">{{ item.referenceLevel }}</span>
+                    </div>
+                    
+                    <span class="status-pill" [class.pill-completed]="item.status === 'Completed'">
+                      {{ item.status === 'Completed' ? 'Completada' : 'En Curso' }}
+                    </span>
+                  </div>
+
+                  <div class="item-progress-row">
+                    <div class="progress-bar-container">
+                      <div class="progress-bar-fill" [style.width.%]="item.progressPercentage"></div>
+                    </div>
+                    <span class="progress-text">{{ item.progressPercentage }}% completado</span>
+                  </div>
+
+                  <div class="item-actions-row">
+                    <span class="date-text">
+                      {{ item.status === 'Completed' ? 'Finalizada el ' + (item.completedAt | date:'dd/MM/yyyy HH:mm') : 'Iniciada el ' + (item.startedAt | date:'dd/MM/yyyy HH:mm') }}
+                    </span>
+                    <button class="resume-btn" [routerLink]="['/lessons/play', item.lessonId]">
+                      {{ item.status === 'Completed' ? 'Repasar' : 'Reanudar' }}
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+      </section>
+
+      <!-- RIGHT COLUMN: PROFILE SETTINGS -->
+      <section class="profile-section">
+        
+        <div class="settings-box">
+          <h2 class="section-title">Ajustes del Perfil</h2>
+          <p class="settings-desc">Edita tus datos personales o cambia tu contraseña de acceso.</p>
+
+          <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="settings-form">
+            
+            <!-- Success / Error alerts -->
+            @if (saveSuccess()) {
+              <div class="alert alert-success" role="alert">
+                ¡Perfil actualizado con éxito!
+              </div>
+            }
+
+            @if (saveError(); as errorMsg) {
+              <div class="alert alert-danger" role="alert">
+                {{ errorMsg }}
+              </div>
+            }
+
+            <!-- Full Name -->
+            <div class="form-group">
+              <label for="fullName">Nombre Completo</label>
+              <input 
+                type="text" 
+                id="fullName" 
+                formControlName="fullName"
+                class="form-control"
+                [class.is-invalid]="profileForm.get('fullName')?.touched && profileForm.get('fullName')?.invalid" />
+              @if (profileForm.get('fullName')?.touched && profileForm.get('fullName')?.invalid) {
+                <div class="invalid-feedback">El nombre es requerido y debe ser válido.</div>
+              }
+            </div>
+
+            <!-- Email -->
+            <div class="form-group">
+              <label for="email">Correo Electrónico</label>
+              <input 
+                type="email" 
+                id="email" 
+                formControlName="email"
+                class="form-control"
+                [class.is-invalid]="profileForm.get('email')?.touched && profileForm.get('email')?.invalid" />
+              @if (profileForm.get('email')?.touched && profileForm.get('email')?.invalid) {
+                <div class="invalid-feedback">Ingresa un correo electrónico válido.</div>
+              }
+            </div>
+
+            <hr class="form-divider" />
+            <h3 class="subsection-title">Cambiar Contraseña (Opcional)</h3>
+
+            <!-- Current Password -->
+            <div class="form-group">
+              <label for="currentPassword">Contraseña Actual</label>
+              <input 
+                type="password" 
+                id="currentPassword" 
+                formControlName="currentPassword"
+                placeholder="Escribe tu contraseña actual si deseas cambiarla"
+                class="form-control" />
+            </div>
+
+            <!-- New Password -->
+            <div class="form-group">
+              <label for="newPassword">Nueva Contraseña</label>
+              <input 
+                type="password" 
+                id="newPassword" 
+                formControlName="newPassword"
+                placeholder="Mínimo 6 caracteres"
+                class="form-control"
+                [class.is-invalid]="profileForm.get('newPassword')?.touched && profileForm.get('newPassword')?.invalid" />
+              @if (profileForm.get('newPassword')?.touched && profileForm.get('newPassword')?.invalid) {
+                <div class="invalid-feedback">La nueva contraseña debe tener mínimo 6 caracteres.</div>
+              }
+            </div>
+
+            <!-- Submit Button -->
+            <button 
+              type="submit" 
+              class="save-btn" 
+              [disabled]="profileForm.invalid || isSaving()">
+              @if (isSaving()) {
+                Guardando cambios...
+              } @else {
+                Guardar Ajustes
+              }
+            </button>
+
+          </form>
+
+        </div>
+
+      </section>
+
+    </div>
+
+  }
+
+</div>

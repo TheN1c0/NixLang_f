@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { LessonService } from '../../services/lesson.service';
 import { UserService } from '../../../../core/services/user.service';
 import { LessonSummary } from '../../models/lesson.model';
@@ -14,6 +15,7 @@ import { LessonCardComponent } from '../../components/lesson-card/lesson-card.co
 export class CatalogPageComponent implements OnInit {
   private readonly lessonService = inject(LessonService);
   readonly userService = inject(UserService);
+  private readonly router = inject(Router);
 
   // Filter & Search states
   readonly selectedLevel = signal<string>('Todos');
@@ -62,39 +64,25 @@ export class CatalogPageComponent implements OnInit {
     this.loadLessons();
   }
 
-  /**
-   * Toggles the favorite star state reactively in memory
-   */
   handleToggleFavorite(lessonId: string): void {
-    this.lessons.update(list => list.map(lesson => 
-      lesson.id === lessonId 
-        ? { ...lesson, isFavorite: !lesson.isFavorite } 
-        : lesson
-    ));
+    this.lessonService.toggleFavorite(lessonId).subscribe({
+      next: (res) => {
+        this.lessons.update(list => list.map(lesson => 
+          lesson.id === lessonId 
+            ? { ...lesson, isFavorite: res.isFavorite } 
+            : lesson
+        ));
+      },
+      error: (err) => {
+        console.error('Failed to toggle favorite:', err);
+      }
+    });
   }
 
   /**
-   * Handles the lesson startup/resume/repass clicking events.
-   * Simulates real progress incrementing for interactive client validation.
+   * Navigates to the lesson play page to start or resume execution.
    */
   handleStart(lessonId: string): void {
-    this.lessons.update(list => list.map(lesson => {
-      if (lesson.id === lessonId) {
-        if (!lesson.status || lesson.status === 'NoIniciada') {
-          return { ...lesson, status: 'EnProgreso', progressPercentage: 25 };
-        } else if (lesson.status === 'EnProgreso') {
-          const nextVal = (lesson.progressPercentage || 0) + 25;
-          if (nextVal >= 100) {
-            return { ...lesson, status: 'Completada', progressPercentage: 100 };
-          } else {
-            return { ...lesson, progressPercentage: nextVal };
-          }
-        } else {
-          // Reset to repass (NoIniciada)
-          return { ...lesson, status: 'NoIniciada', progressPercentage: 0 };
-        }
-      }
-      return lesson;
-    }));
+    this.router.navigate(['/lessons/play', lessonId]);
   }
 }

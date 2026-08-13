@@ -1,4 +1,4 @@
-<div class="login-container">
+<div class="register-container">
   
   <!-- Left Side: Conceptual Illustration Panel -->
   <div class="illustration-panel" role="presentation">
@@ -12,9 +12,9 @@
     </div>
   </div>
 
-  <!-- Right Side: Login Card Panel -->
+  <!-- Right Side: Register Card Panel -->
   <div class="form-panel">
-    <div class="login-card">
+    <div class="register-card">
       
       <!-- Logo Container -->
       <div class="logo-container">
@@ -27,12 +27,12 @@
 
       <!-- Header Titles -->
       <header class="card-header">
-        <h1>Iniciar sesión</h1>
-        <p class="subtitle">Aprende inglés a tu ritmo.</p>
+        <h1>Crear cuenta</h1>
+        <p class="subtitle">Regístrate para comenzar a aprender inglés gratis.</p>
       </header>
 
       <!-- Form Segment -->
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form" novalidate>
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form" novalidate>
         
         <!-- Generic Server Error -->
         @if (errorMessage()) {
@@ -43,6 +43,40 @@
             <span>{{ errorMessage() }}</span>
           </div>
         }
+
+        <!-- Success Message -->
+        @if (successMessage()) {
+          <div class="success-alert" role="alert">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" class="alert-icon" aria-hidden="true">
+              <path d="m382-354 339-339q12-12 28.5-12t28.5 12q12 12 12 28.5T778-636L410-268q-12 12-28.5 12t-28.5-12L182-439q-12-12-12-28.5t12-28.5q12-12 28.5-12t28.5 12l142 142Z"/>
+            </svg>
+            <span>{{ successMessage() }}</span>
+          </div>
+        }
+
+        <!-- Full Name Field -->
+        <div class="form-group">
+          <label for="fullName">Nombre completo</label>
+          <input 
+            type="text" 
+            id="fullName" 
+            formControlName="fullName" 
+            placeholder="Tu nombre y apellido"
+            [class.invalid]="fullName?.invalid && fullName?.touched"
+            autocomplete="name"
+            required>
+          
+          @if (fullName?.touched && fullName?.errors) {
+            <div class="validation-error">
+              @if (fullName?.errors?.['required']) {
+                <span>El nombre completo es requerido.</span>
+              }
+              @if (fullName?.errors?.['maxlength']) {
+                <span>El nombre no debe superar los 100 caracteres.</span>
+              }
+            </div>
+          }
+        </div>
 
         <!-- Email Field -->
         <div class="form-group">
@@ -76,9 +110,9 @@
               [type]="showPassword() ? 'text' : 'password'" 
               id="password" 
               formControlName="password" 
-              placeholder="••••••••"
+              placeholder="Mínimo 8 caracteres"
               [class.invalid]="password?.invalid && password?.touched"
-              autocomplete="current-password"
+              autocomplete="new-password"
               required>
             
             <button 
@@ -87,12 +121,10 @@
               (click)="togglePasswordVisibility()"
               [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'">
               @if (showPassword()) {
-                <!-- Eye Slashed Icon -->
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
                   <path d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-154 0-277.5-88.5T34-500q69-123 192.5-211.5T480-800q154 0 277.5 88.5T926-500q-69 123-192.5 211.5T480-200Z"/>
                 </svg>
               } @else {
-                <!-- Eye Icon -->
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
                   <path d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-154 0-277.5-88.5T34-500q69-123 192.5-211.5T480-800q154 0 277.5 88.5T926-500q-69 123-192.5 211.5T480-200Z" opacity="0.4"/>
                 </svg>
@@ -106,31 +138,64 @@
                 <span>La contraseña es requerida.</span>
               }
               @if (password?.errors?.['minlength']) {
-                <span>La contraseña debe tener al menos 6 caracteres.</span>
+                <span>La contraseña debe tener al menos 8 caracteres.</span>
               }
             </div>
           }
         </div>
 
-        <!-- Options: Remember & Forgot -->
-        <div class="form-options">
-          <label class="remember-me">
-            <input type="checkbox" formControlName="rememberMe">
-            <span class="checkbox-label">Recordarme</span>
-          </label>
-          <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+        <!-- Confirm Password Field -->
+        <div class="form-group">
+          <label for="confirmPassword">Confirmar contraseña</label>
+          <div class="password-input-wrapper">
+            <input 
+              [type]="showConfirmPassword() ? 'text' : 'password'" 
+              id="confirmPassword" 
+              formControlName="confirmPassword" 
+              placeholder="Repite la contraseña"
+              [class.invalid]="(confirmPassword?.invalid || registerForm.errors?.['passwordMismatch']) && confirmPassword?.touched"
+              autocomplete="new-password"
+              required>
+            
+            <button 
+              type="button" 
+              class="toggle-password" 
+              (click)="toggleConfirmPasswordVisibility()"
+              [attr.aria-label]="showConfirmPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+              @if (showConfirmPassword()) {
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
+                  <path d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-154 0-277.5-88.5T34-500q69-123 192.5-211.5T480-800q154 0 277.5 88.5T926-500q-69 123-192.5 211.5T480-200Z"/>
+                </svg>
+              } @else {
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
+                  <path d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-154 0-277.5-88.5T34-500q69-123 192.5-211.5T480-800q154 0 277.5 88.5T926-500q-69 123-192.5 211.5T480-200Z" opacity="0.4"/>
+                </svg>
+              }
+            </button>
+          </div>
+
+          @if (confirmPassword?.touched && (confirmPassword?.errors || registerForm.errors?.['passwordMismatch'])) {
+            <div class="validation-error">
+              @if (confirmPassword?.errors?.['required']) {
+                <span>La confirmación de contraseña es requerida.</span>
+              }
+              @if (registerForm.errors?.['passwordMismatch']) {
+                <span>Las contraseñas no coinciden.</span>
+              }
+            </div>
+          }
         </div>
 
         <!-- Submit Button -->
         <button 
           type="submit" 
           class="btn-submit" 
-          [disabled]="loading() || loginForm.invalid">
+          [disabled]="loading() || registerForm.invalid">
           @if (loading()) {
             <span class="spinner" aria-hidden="true"></span>
-            <span>Iniciando sesión...</span>
+            <span>Creando cuenta...</span>
           } @else {
-            <span>Iniciar sesión</span>
+            <span>Crear cuenta</span>
           }
         </button>
 
@@ -138,7 +203,7 @@
 
       <!-- Footer Info -->
       <footer class="card-footer">
-        <p>¿No tienes cuenta? <a routerLink="/auth/register" class="register-link">Crear cuenta</a></p>
+        <p>¿Ya tienes cuenta? <a routerLink="/auth/login" class="register-link">Iniciar sesión</a></p>
       </footer>
 
     </div>
