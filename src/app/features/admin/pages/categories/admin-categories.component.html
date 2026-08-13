@@ -1,0 +1,114 @@
+<div class="page-header">
+  <div>
+    <h2 class="page-title">Gestión de Categorías</h2>
+    <p class="page-subtitle">Crea y edita las categorías temáticas y gramaticales asociadas a las lecciones.</p>
+  </div>
+</div>
+
+<!-- Alert Banners -->
+@if (errorMessage()) {
+  <div class="alert alert-danger" role="alert">
+    <span>{{ errorMessage() }}</span>
+  </div>
+}
+@if (successMessage()) {
+  <div class="alert alert-success" role="alert">
+    <span>{{ successMessage() }}</span>
+  </div>
+}
+
+<div class="categories-grid">
+  
+  <!-- Category Form -->
+  <div class="form-card">
+    <h3 class="card-title">{{ editMode() ? 'Editar Categoría' : 'Nueva Categoría' }}</h3>
+    
+    <form (ngSubmit)="onSubmit()" #categoryForm="ngForm" class="reactive-form">
+      <div class="form-group">
+        <label for="categoryName" class="form-label">Nombre de Categoría</label>
+        <input 
+          type="text" 
+          id="categoryName" 
+          name="name" 
+          class="form-control" 
+          [(ngModel)]="nameInput" 
+          placeholder="Ej: Gramática, Vocabulario A1, Verbos..." 
+          required 
+          autocomplete="off" />
+      </div>
+
+      <div class="form-group">
+        <label for="categoryDescription" class="form-label">Descripción</label>
+        <textarea 
+          id="categoryDescription" 
+          name="description" 
+          class="form-control form-textarea" 
+          [(ngModel)]="descriptionInput" 
+          placeholder="Escribe una breve descripción de esta categoría..." 
+          rows="4"></textarea>
+      </div>
+
+      <div class="form-actions">
+        @if (editMode()) {
+          <button type="button" class="btn btn-secondary" (click)="resetForm()" [disabled]="loading()">Cancelar</button>
+        }
+        <button type="submit" class="btn btn-primary" [disabled]="loading() || !nameInput.trim()">
+          {{ editMode() ? 'Actualizar' : 'Guardar Categoría' }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Categories List -->
+  <div class="list-card">
+    <h3 class="card-title">Categorías Existentes</h3>
+
+    @if (loading() && categories().length === 0) {
+      <div class="shimmer-table">
+        <div class="shimmer-row"></div>
+        <div class="shimmer-row"></div>
+        <div class="shimmer-row"></div>
+      </div>
+    } @else if (categories().length === 0) {
+      <div class="empty-state">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" class="empty-icon">
+          <path d="M300-80q-58 0-99-41t-41-99v-520q0-58 41-99t99-41h400q58 0 99 41t41 99v520q0 58-41 99t-99 41H300Zm0-80h400q25 0 42.5-17.5T760-220v-520q0-25-17.5-42.5T700-800H300q-25 0-42.5 17.5T240-750v520q0 25 17.5 42.5T300-160Z"/>
+        </svg>
+        <p class="empty-text">No hay categorías creadas aún. Crea tu primera categoría usando el formulario de la izquierda.</p>
+      </div>
+    } @else {
+      <div class="table-container">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th scope="col">Nombre</th>
+              <th scope="col">Descripción</th>
+              <th scope="col" class="text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (cat of categories(); track cat.id) {
+              <tr [class.editing-row]="cat.id === selectedCategoryId()">
+                <td class="font-semibold">{{ cat.name }}</td>
+                <td class="text-secondary text-truncate">{{ cat.description || 'Sin descripción' }}</td>
+                <td class="text-right actions-cell">
+                  <button type="button" class="action-btn edit-btn" (click)="startEdit(cat)" title="Editar categoría">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" class="action-icon">
+                      <path d="M200-200h57l359-359-57-57-359 359v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/>
+                    </svg>
+                  </button>
+                  <button type="button" class="action-btn delete-btn" (click)="deleteCategory(cat.id)" title="Eliminar categoría">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" class="action-icon">
+                      <path d="M280-80q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-80H280Zm400-640H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+</div>

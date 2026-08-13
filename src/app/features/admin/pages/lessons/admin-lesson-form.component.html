@@ -1,0 +1,234 @@
+<div class="page-header">
+  <div>
+    <div class="back-link" routerLink="/admin/lessons" style="cursor: pointer;">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" class="back-icon">
+        <path d="m313-440 224 224-57 57-320-320 320-320 57 57-224 224h487v80H313Z"/>
+      </svg>
+      <span>Volver a Lecciones</span>
+    </div>
+    <h2 class="page-title">{{ editMode() ? 'Editar Lección' : 'Crear Lección' }}</h2>
+    <p class="page-subtitle">{{ editMode() ? 'Modifica los metadatos y la estructura de bloques de la lección.' : 'Crea una nueva lección estructurada con bloques informativos y ejercicios.' }}</p>
+  </div>
+</div>
+
+<!-- Alert Banner -->
+@if (errorMessage()) {
+  <div class="alert alert-danger" role="alert">
+    <span>{{ errorMessage() }}</span>
+  </div>
+}
+
+<div class="form-card">
+  <form (ngSubmit)="onSubmit()" class="reactive-form">
+    
+    <!-- Meta fields row -->
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label for="title" class="form-label">Título de la Lección</label>
+        <input 
+          type="text" 
+          id="title" 
+          name="title" 
+          class="form-control" 
+          [(ngModel)]="title" 
+          placeholder="Ej: Saludos básicos en inglés" 
+          required 
+          autocomplete="off" />
+      </div>
+
+      <div class="form-group">
+        <label for="level" class="form-label">Nivel de Referencia (Mapeo Backend)</label>
+        <select id="level" name="level" class="form-control" [(ngModel)]="referenceLevel">
+          <option value="A1">A1 - Principiante</option>
+          <option value="A2">A2 - Elemental</option>
+          <option value="B1">B1 - Intermedio</option>
+          <option value="B2">B2 - Intermedio Alto</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Description Field -->
+    <div class="form-group">
+      <label for="description" class="form-label">Descripción</label>
+      <textarea 
+        id="description" 
+        name="description" 
+        class="form-control form-textarea" 
+        [(ngModel)]="description" 
+        placeholder="Escribe una breve descripción del contenido de la lección..." 
+        rows="3" 
+        required></textarea>
+    </div>
+
+    <!-- Status Field -->
+    <div class="form-group">
+      <label for="status" class="form-label">Estado de Publicación</label>
+      <select id="status" name="status" class="form-control" [(ngModel)]="status">
+        <option value="Draft">Borrador (Oculta para estudiantes)</option>
+        <option value="Published">Publicada (Disponible en catálogo)</option>
+      </select>
+    </div>
+
+    <!-- Categories multi-selector tags -->
+    <div class="form-group">
+      <label class="form-label">Categorías Vinculadas</label>
+      <div class="categories-tags-container">
+        @if (categoriesList().length === 0) {
+          <span class="no-cats">No hay categorías disponibles. Créalas primero en la sección de Categorías.</span>
+        }
+        @for (cat of categoriesList(); track cat.id) {
+          <button 
+            type="button" 
+            class="category-tag-btn" 
+            [class.selected-tag]="isCategorySelected(cat.id)" 
+            (click)="toggleCategory(cat.id)">
+            <span>{{ cat.name }}</span>
+            @if (isCategorySelected(cat.id)) {
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" class="tag-check-icon">
+                <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z"/>
+              </svg>
+            }
+          </button>
+        }
+      </div>
+      <span class="form-help">Haz clic sobre las categorías para asociarlas o desasociarlas de esta lección.</span>
+    </div>
+
+    <!-- BLOCKS CONSTRUCTOR AREA -->
+    <div class="blocks-constructor-section">
+      <div class="blocks-header">
+        <h3 class="blocks-title">Estructura y Bloques de la Lección</h3>
+        <p class="blocks-desc">Una lección se compone de bloques informativos (Títulos, Párrafos) y Ejercicios secuenciales.</p>
+      </div>
+
+      <!-- Empty blocks placeholder -->
+      @if (blocks.length === 0) {
+        <div class="blocks-empty-state">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" class="empty-icon">
+            <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm0 0v-560 560Z"/>
+          </svg>
+          <p class="empty-text">No has añadido bloques aún. Utiliza los botones inferiores para componer la lección.</p>
+        </div>
+      }
+
+      <!-- Blocks list -->
+      <div class="blocks-list">
+        @for (block of blocks; track $index) {
+          <div class="block-card" [class.block-heading]="block.type === 'Heading'" [class.block-paragraph]="block.type === 'Paragraph'" [class.block-exercise]="block.type === 'Exercise'">
+            
+            <!-- Block Header Bar -->
+            <div class="block-card-header">
+              <div class="block-card-meta">
+                <span class="block-sequence">#{{ block.sequence }}</span>
+                <span class="block-type-badge">
+                  {{ block.type === 'Heading' ? 'Título' : (block.type === 'Paragraph' ? 'Párrafo' : 'Ejercicio') }}
+                </span>
+              </div>
+
+              <!-- Reordering and delete buttons -->
+              <div class="block-actions">
+                <button 
+                  type="button" 
+                  class="block-nav-btn" 
+                  [disabled]="$index === 0" 
+                  (click)="moveBlockUp($index)" 
+                  title="Subir bloque">
+                  &uarr;
+                </button>
+                <button 
+                  type="button" 
+                  class="block-nav-btn" 
+                  [disabled]="$index === blocks.length - 1" 
+                  (click)="moveBlockDown($index)" 
+                  title="Bajar bloque">
+                  &darr;
+                </button>
+                <button 
+                  type="button" 
+                  class="block-delete-btn" 
+                  (click)="removeBlock($index)" 
+                  title="Eliminar bloque">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" class="btn-icon">
+                    <path d="M280-80q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-80H280Zm400-640H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Block Body Content inputs -->
+            <div class="block-card-body">
+              
+              <!-- 1. Heading Input -->
+              @if (block.type === 'Heading') {
+                <input 
+                  type="text" 
+                  class="form-control block-input" 
+                  [(ngModel)]="block.configurationValue" 
+                  [name]="'blockHeading_' + $index" 
+                  placeholder="Escribe el título de esta sección de la lección..." 
+                  required 
+                  autocomplete="off" />
+              }
+
+              <!-- 2. Paragraph Input -->
+              @if (block.type === 'Paragraph') {
+                <textarea 
+                  class="form-control block-input form-textarea" 
+                  [(ngModel)]="block.configurationValue" 
+                  [name]="'blockParagraph_' + $index" 
+                  placeholder="Escribe el párrafo o texto explicativo..." 
+                  rows="3" 
+                  required></textarea>
+              }
+
+              <!-- 3. Exercise selector dropdown -->
+              @if (block.type === 'Exercise') {
+                <div class="exercise-selector-wrapper">
+                  <label [for]="'exSelect_' + $index" class="form-label block-inner-label">Seleccionar Ejercicio Vinculado</label>
+                  <select 
+                    [id]="'exSelect_' + $index" 
+                    [(ngModel)]="block.referencedExerciseId" 
+                    [name]="'blockExercise_' + $index" 
+                    class="form-control block-select" 
+                    required>
+                    @if (exercisesList().length === 0) {
+                      <option value="">No hay ejercicios disponibles en el banco</option>
+                    }
+                    @for (ex of exercisesList(); track ex.id) {
+                      <option [value]="ex.id">{{ ex.statement }} ({{ ex.type === 'MultipleChoice' ? 'Opción Múltiple' : 'Traducción' }})</option>
+                    }
+                  </select>
+                </div>
+              }
+
+            </div>
+
+          </div>
+        }
+      </div>
+
+      <!-- Add block action triggers -->
+      <div class="add-block-triggers">
+        <button type="button" class="btn btn-secondary block-add-btn" (click)="addBlock('Heading')">
+          <span>+ Agregar Título</span>
+        </button>
+        <button type="button" class="btn btn-secondary block-add-btn" (click)="addBlock('Paragraph')">
+          <span>+ Agregar Párrafo</span>
+        </button>
+        <button type="button" class="btn btn-secondary block-add-btn" (click)="addBlock('Exercise')">
+          <span>+ Agregar Ejercicio</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Form Actions Bar -->
+    <div class="form-actions-bar">
+      <button type="button" class="btn btn-secondary" routerLink="/admin/lessons" [disabled]="loading()">Cancelar</button>
+      <button type="submit" class="btn btn-primary" [disabled]="loading()">
+        {{ editMode() ? 'Actualizar Lección' : 'Crear Lección' }}
+      </button>
+    </div>
+
+  </form>
+</div>

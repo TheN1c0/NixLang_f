@@ -1,11 +1,17 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { adminGuard } from './core/guards/admin.guard';
 import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
 
 export const routes: Routes = [
   {
     path: 'auth',
     loadChildren: () => import('./features/auth/auth.routes').then(m => m.AUTH_ROUTES)
+  },
+  {
+    path: 'admin',
+    canActivate: [authGuard, adminGuard],
+    loadChildren: () => import('./features/admin/admin.routes').then(m => m.ADMIN_ROUTES)
   },
   {
     path: '',
@@ -23,10 +29,6 @@ export const routes: Routes = [
       {
         path: 'progress',
         loadChildren: () => import('./features/progress/progress.routes').then(m => m.PROGRESS_ROUTES)
-      },
-      {
-        path: 'admin',
-        loadChildren: () => import('./features/admin/admin.routes').then(m => m.ADMIN_ROUTES)
       },
       {
         path: '',

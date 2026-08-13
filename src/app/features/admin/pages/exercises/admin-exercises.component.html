@@ -1,0 +1,148 @@
+<div class="page-header">
+  <div>
+    <h2 class="page-title">Gestión de Ejercicios</h2>
+    <p class="page-subtitle">Crea, edita y organiza el banco de ejercicios interactivos disponibles en la plataforma.</p>
+  </div>
+  <button type="button" class="btn btn-primary" routerLink="/admin/exercises/new">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" class="btn-icon">
+      <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/>
+    </svg>
+    <span>Nuevo Ejercicio</span>
+  </button>
+</div>
+
+<!-- Alert Banners -->
+@if (errorMessage()) {
+  <div class="alert alert-danger" role="alert">
+    <span>{{ errorMessage() }}</span>
+  </div>
+}
+@if (successMessage()) {
+  <div class="alert alert-success" role="alert">
+    <span>{{ successMessage() }}</span>
+  </div>
+}
+
+<!-- Search & Filtering -->
+<div class="filter-card">
+  <form (submit)="onSearch()" class="search-form">
+    <div class="search-input-wrapper">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" class="search-icon">
+        <path d="M784-120 532-372q-30 24-74 38t-90 14q-117 0-198.5-81.5T88-600q0-117 81.5-198.5T368-880q117 0 198.5 81.5T648-600q0 49-14 90t-38 74l252 252-56 56ZM368-202q83 0 140.5-57.5T566-400q0-83-57.5-140.5T368-598q-83 0-140.5 57.5T170-400q0 83 57.5 140.5T368-202Z"/>
+      </svg>
+      <input 
+        type="text" 
+        class="form-control search-control" 
+        placeholder="Buscar ejercicio por enunciado o respuesta..." 
+        [(ngModel)]="searchText" 
+        name="search" 
+        autocomplete="off" />
+      @if (searchText) {
+        <button type="button" class="clear-search-btn" (click)="clearSearch()" aria-label="Limpiar búsqueda">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" class="clear-icon">
+            <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/>
+          </svg>
+        </button>
+      }
+    </div>
+    <button type="submit" class="btn btn-secondary">Buscar</button>
+  </form>
+</div>
+
+<!-- Exercises List Card -->
+<div class="list-card">
+  @if (loading() && exercises().length === 0) {
+    <div class="shimmer-table">
+      <div class="shimmer-row"></div>
+      <div class="shimmer-row"></div>
+      <div class="shimmer-row"></div>
+      <div class="shimmer-row"></div>
+      <div class="shimmer-row"></div>
+    </div>
+  } @else if (exercises().length === 0) {
+    <div class="empty-state">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" class="empty-icon">
+        <path d="M160-120v-80h640v80H160Zm200-160v-400h240v400H360Zm80-80h80v-240h-80v240Zm-280-80v-80h160v80H160Zm480 0v-80h160v80H640Z"/>
+      </svg>
+      <p class="empty-text">No se encontraron ejercicios en el banco. Haz clic en "Nuevo Ejercicio" para registrar el primero.</p>
+    </div>
+  } @else {
+    <div class="table-container">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th scope="col">Enunciado / Pregunta</th>
+            <th scope="col">Tipo</th>
+            <th scope="col">Respuesta Correcta</th>
+            <th scope="col" class="text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (ex of exercises(); track ex.id) {
+            <tr>
+              <td class="font-semibold text-wrap">{{ ex.statement }}</td>
+              <td>
+                <span class="type-badge" [class]="'badge-' + ex.type">
+                  {{ translateType(ex.type) }}
+                </span>
+              </td>
+              <td class="text-secondary text-wrap-answer">
+                {{ ex.correctAnswer || 'N/A' }}
+              </td>
+              <td class="text-right actions-cell">
+                <button type="button" class="action-btn edit-btn" (click)="editExercise(ex.id)" title="Editar ejercicio">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" class="action-icon">
+                    <path d="M200-200h57l359-359-57-57-359 359v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/>
+                  </svg>
+                </button>
+                <button type="button" class="action-btn delete-btn" (click)="deleteExercise(ex.id)" title="Eliminar ejercicio">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" class="action-icon">
+                    <path d="M280-80q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-80H280Zm400-640H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination Footer -->
+    @if (totalPages() > 1) {
+      <div class="pagination-footer">
+        <span class="pagination-info">
+          Mostrando página <strong>{{ currentPage() }}</strong> de <strong>{{ totalPages() }}</strong> (<strong>{{ totalCount() }}</strong> ejercicios en total)
+        </span>
+        <div class="pagination-controls">
+          <button 
+            type="button" 
+            class="page-control-btn" 
+            [disabled]="currentPage() === 1" 
+            (click)="changePage(currentPage() - 1)" 
+            aria-label="Página anterior">
+            &laquo;
+          </button>
+          
+          @for (p of getPagesArray(); track p) {
+            <button 
+              type="button" 
+              class="page-number-btn" 
+              [class.active-page]="p === currentPage()" 
+              (click)="changePage(p)">
+              {{ p }}
+            </button>
+          }
+
+          <button 
+            type="button" 
+            class="page-control-btn" 
+            [disabled]="currentPage() === totalPages()" 
+            (click)="changePage(currentPage() + 1)" 
+            aria-label="Página siguiente">
+            &raquo;
+          </button>
+        </div>
+      </div>
+    }
+  }
+</div>

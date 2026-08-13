@@ -1,0 +1,162 @@
+<div class="page-header">
+  <div>
+    <div class="back-link" routerLink="/admin/exercises" style="cursor: pointer;">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" class="back-icon">
+        <path d="m313-440 224 224-57 57-320-320 320-320 57 57-224 224h487v80H313Z"/>
+      </svg>
+      <span>Volver a Ejercicios</span>
+    </div>
+    <h2 class="page-title">{{ editMode() ? 'Editar Ejercicio' : 'Crear Ejercicio' }}</h2>
+    <p class="page-subtitle">{{ editMode() ? 'Modifica los datos del ejercicio en el banco.' : 'Crea un nuevo ejercicio interactivo.' }}</p>
+  </div>
+</div>
+
+<!-- Alert Banner -->
+@if (errorMessage()) {
+  <div class="alert alert-danger" role="alert">
+    <span>{{ errorMessage() }}</span>
+  </div>
+}
+
+<div class="form-card">
+  <form (ngSubmit)="onSubmit()" class="reactive-form">
+    
+    <!-- Exercise Type Selection -->
+    <div class="form-group">
+      <label class="form-label">Tipo de Ejercicio</label>
+      <div class="type-selector-grid">
+        <label class="type-option-card" [class.selected-type]="type === 'MultipleChoice'">
+          <input 
+            type="radio" 
+            name="exerciseType" 
+            value="MultipleChoice" 
+            [(ngModel)]="type" 
+            [disabled]="editMode()" />
+          <div class="type-details">
+            <span class="type-title">Opción Múltiple</span>
+            <span class="type-desc">El estudiante elige la respuesta correcta de entre varias alternativas.</span>
+          </div>
+        </label>
+        
+        <label class="type-option-card" [class.selected-type]="type === 'Translation'">
+          <input 
+            type="radio" 
+            name="exerciseType" 
+            value="Translation" 
+            [(ngModel)]="type" 
+            [disabled]="editMode()" />
+          <div class="type-details">
+            <span class="type-title">Traducción</span>
+            <span class="type-desc">El estudiante traduce la frase escrita al inglés escribiendo texto libre.</span>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Statement Input -->
+    <div class="form-group">
+      <label for="statement" class="form-label">Enunciado / Pregunta (en español)</label>
+      <input 
+        type="text" 
+        id="statement" 
+        name="statement" 
+        class="form-control" 
+        [(ngModel)]="statement" 
+        placeholder="Ej: ¿Cómo se dice 'Buenos días' en inglés?" 
+        required 
+        autocomplete="off" />
+    </div>
+
+    <!-- Audio Resource URL (Optional) -->
+    <div class="form-group">
+      <label for="audioUrl" class="form-label">Recurso de Audio URL (Opcional)</label>
+      <input 
+        type="url" 
+        id="audioUrl" 
+        name="audioUrl" 
+        class="form-control" 
+        [(ngModel)]="audioResourceUrl" 
+        placeholder="Ej: https://nixlang-audios.s3.amazonaws.com/good_morning.mp3" 
+        autocomplete="off" />
+    </div>
+
+    <!-- CONDITIONAL RENDER: TRANSLATION CORRECT ANSWER -->
+    @if (type === 'Translation') {
+      <div class="form-group">
+        <label for="correctAnswer" class="form-label">Respuesta Correcta (en inglés)</label>
+        <input 
+          type="text" 
+          id="correctAnswer" 
+          name="correctAnswer" 
+          class="form-control" 
+          [(ngModel)]="correctAnswer" 
+          placeholder="Ej: Good morning" 
+          required 
+          autocomplete="off" />
+        <span class="form-help">La validación se realiza sin distinguir entre mayúsculas y minúsculas.</span>
+      </div>
+    }
+
+    <!-- CONDITIONAL RENDER: MULTIPLE CHOICE ALTERNATIVES -->
+    @if (type === 'MultipleChoice') {
+      <div class="options-section">
+        <div class="options-header">
+          <label class="form-label">Alternativas / Opciones de respuesta</label>
+          <span class="options-info">Marque la opción correcta usando el botón de selección redondo.</span>
+        </div>
+
+        <div class="options-list">
+          @for (opt of options; track $index) {
+            <div class="option-row">
+              <div class="option-radio-wrapper" title="Marcar como correcta">
+                <input 
+                  type="radio" 
+                  name="correctOption" 
+                  [checked]="opt.isCorrect" 
+                  (change)="setOptionAsCorrect($index)" />
+              </div>
+              
+              <input 
+                type="text" 
+                class="form-control option-text-control" 
+                [class.correct-option-input]="opt.isCorrect" 
+                placeholder="Escribe la alternativa..." 
+                [value]="opt.text" 
+                (input)="onOptionTextChange($index, optionInput.value)" 
+                #optionInput 
+                autocomplete="off" 
+                required />
+
+              <button 
+                type="button" 
+                class="remove-option-btn" 
+                [disabled]="options.length <= 2" 
+                (click)="removeOption($index)" 
+                title="Eliminar alternativa">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" class="btn-icon">
+                  <path d="M280-80q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-80H280Zm400-640H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/>
+                </svg>
+              </button>
+            </div>
+          }
+        </div>
+
+        <button type="button" class="btn btn-secondary add-opt-btn" (click)="addOption()">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" class="btn-icon">
+            <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/>
+          </svg>
+          <span>Agregar Alternativa</span>
+        </button>
+      </div>
+    }
+
+    <!-- Form Actions -->
+    <div class="form-actions-bar">
+      <button type="button" class="btn btn-secondary" routerLink="/admin/exercises" [disabled]="loading()">Cancelar</button>
+      <button type="submit" class="btn btn-primary" [disabled]="loading()">
+        {{ editMode() ? 'Actualizar Ejercicio' : 'Crear Ejercicio' }}
+      </button>
+    </div>
+
+  </form>
+</div>

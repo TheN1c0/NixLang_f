@@ -84,4 +84,38 @@ export class AuthService {
       localStorage.removeItem(this.storageKey);
     }
   }
+
+  /**
+   * Decodes JWT token payload and returns roles array
+   */
+  getRoles(): string[] {
+    const currentSession = this.session();
+    if (!currentSession?.accessToken) {
+      return [];
+    }
+    try {
+      const payloadBase64 = currentSession.accessToken.split('.')[1];
+      const payloadJson = atob(payloadBase64.replace(/-/g, '+').replace(/_/g, '/'));
+      const payload = JSON.parse(payloadJson);
+      const role = payload.role;
+      if (!role) {
+        return [];
+      }
+      return Array.isArray(role) ? role : [role];
+    } catch (e) {
+      console.error('Failed to decode JWT token', e);
+      return [];
+    }
+  }
+
+  /**
+   * Checks if user is authenticated and has administrative role
+   */
+  isAdmin(): boolean {
+    if (!this.isAuthenticated()) {
+      return false;
+    }
+    const roles = this.getRoles();
+    return roles.includes('Administrator') || roles.includes('Admin');
+  }
 }
