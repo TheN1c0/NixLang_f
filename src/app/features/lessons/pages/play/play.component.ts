@@ -1,8 +1,18 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { LessonService } from '../../services/lesson.service';
 import { LessonDetail, LessonBlock } from '../../models/lesson.model';
 import { LessonBlockRendererComponent } from '../../components/block-renderer/block-renderer.component';
+import { Subject, Subscription } from 'rxjs';
+import { concatMap } from 'rxjs/operators';
+
+interface ProgressPayload {
+  lessonId: string;
+  percentage: number;
+  status: 'NotStarted' | 'InProgress' | 'Completed';
+  results: { exerciseId: string; givenAnswer: string; isCorrect: boolean }[];
+}
+
 
 @Component({
   selector: 'app-lesson-play',
@@ -11,10 +21,13 @@ import { LessonBlockRendererComponent } from '../../components/block-renderer/bl
   templateUrl: './play.component.html',
   styleUrl: './play.component.css'
 })
-export class LessonPlayPageComponent implements OnInit {
+export class LessonPlayPageComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly lessonService = inject(LessonService);
+
+  private readonly progressSubject = new Subject<ProgressPayload>();
+  private progressSubscription?: Subscription;
 
   // Core state signals
   readonly lessonDetail = signal<LessonDetail | null>(null);
@@ -27,6 +40,17 @@ export class LessonPlayPageComponent implements OnInit {
   readonly isCompleted = signal<boolean>(false);
 
   ngOnInit(): void {
+    this.progressSubscription = this.progressSubject
+      .pipe(
+        concatMap(payload =>
+          this.lessonService.saveProgress(payload.lessonId, payload.percentage, payload.status, payload.results)
+        )
+      )
+      .subscribe({
+        next: (res) => console.log('Progress saved successfully:', res),
+        error: (err) => console.error('Failed to save progress:', err)
+      });
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.loadLesson(id);
@@ -34,6 +58,10 @@ export class LessonPlayPageComponent implements OnInit {
       this.errorMessage.set('Identificador de lección no válido.');
       this.isLoading.set(false);
     }
+  }
+
+  ngOnDestroy(): void {
+    this.progressSubscription?.unsubscribe();
   }
 
   loadLesson(id: string): void {
@@ -105,13 +133,11 @@ export class LessonPlayPageComponent implements OnInit {
       isCorrect: res.isCorrect
     }));
 
-    this.lessonService.saveProgress(detail.id, percentage, status, results).subscribe({
-      next: (res) => {
-        console.log('Progress saved successfully:', res);
-      },
-      error: (err) => {
-        console.error('Failed to save progress:', err);
-      }
+    this.progressSubject.next({
+      lessonId: detail.id,
+      percentage,
+      status,
+      results
     });
   }
 
@@ -130,3 +156,4 @@ export class LessonPlayPageComponent implements OnInit {
     return Math.round((this.totalAciertos / total) * 100);
   }
 }
+

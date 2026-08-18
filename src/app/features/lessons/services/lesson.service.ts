@@ -44,18 +44,25 @@ export class LessonService {
 
     return this.http.get<PagedResult<LessonSummaryApi>>(`${environment.apiUrl}/lessons`, { params }).pipe(
       map(res => {
+        console.log('[DIAG-getLessons] Raw API response:', JSON.stringify(res, null, 2));
         if (!res || !res.items) {
           return { items: [], page, pageSize, totalCount: 0, totalPages: 0 };
         }
-        return {
+        const mapped = {
           ...res,
-          items: res.items.map(item => ({
-            ...item,
-            isFavorite: item.isFavorite ?? false,
-            progressPercentage: item.progressPercentage ?? 0,
-            status: item.status === 'Completed' ? 'Completada' as const : (item.status === 'InProgress' ? 'EnProgreso' as const : 'NoIniciada' as const)
-          }))
+          items: res.items.map(item => {
+            const mappedStatus = item.status === 'Completed' ? 'Completada' as const : (item.status === 'InProgress' ? 'EnProgreso' as const : 'NoIniciada' as const);
+            console.log(`[DIAG-getLessons] Mapping lesson "${item.title}": API status="${item.status}" -> UI status="${mappedStatus}", progressPct=${item.progressPercentage}`);
+            return {
+              ...item,
+              isFavorite: item.isFavorite ?? false,
+              progressPercentage: item.progressPercentage ?? 0,
+              status: mappedStatus
+            };
+          })
         };
+        console.log('[DIAG-getLessons] Final mapped items:', JSON.stringify(mapped.items.map(i => ({ title: i.title, status: i.status, pct: i.progressPercentage })), null, 2));
+        return mapped;
       })
     );
   }

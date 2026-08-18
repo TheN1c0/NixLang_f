@@ -24,7 +24,7 @@ export class AdminExerciseFormComponent implements OnInit {
   readonly errorMessage = signal<string | null>(null);
 
   // Form Fields
-  type: 'MultipleChoice' | 'Translation' = 'MultipleChoice';
+  type: 'MultipleChoice' | 'Translation' | 'FillInTheBlank' = 'MultipleChoice';
   statement = '';
   audioResourceUrl = '';
   correctAnswer = '';
@@ -48,8 +48,8 @@ export class AdminExerciseFormComponent implements OnInit {
     this.loading.set(true);
     this.adminService.getExerciseById(id).subscribe({
       next: (ex) => {
-        // Only allow editing supported type
-        if (ex.type !== 'MultipleChoice' && ex.type !== 'Translation') {
+        // Only allow editing supported types
+        if (ex.type !== 'MultipleChoice' && ex.type !== 'Translation' && ex.type !== 'FillInTheBlank') {
           this.errorMessage.set(`El tipo de ejercicio '${ex.type}' no está soportado en esta versión.`);
           this.loading.set(false);
           return;
@@ -146,6 +146,20 @@ export class AdminExerciseFormComponent implements OnInit {
           displayOrder: o.displayOrder
         }))
       };
+    } else if (this.type === 'FillInTheBlank') {
+      // Fill In The Blank Validations
+      if (!this.correctAnswer.trim()) {
+        this.errorMessage.set('La palabra o frase faltante es obligatoria para completar espacios.');
+        return;
+      }
+
+      exercisePayload = {
+        type: 'FillInTheBlank',
+        statement: this.statement.trim(),
+        audioResourceUrl: this.audioResourceUrl.trim() || undefined,
+        correctAnswer: this.correctAnswer.trim(),
+        options: []
+      };
     } else {
       // Translation Validations
       if (!this.correctAnswer.trim()) {
@@ -161,6 +175,7 @@ export class AdminExerciseFormComponent implements OnInit {
         options: []
       };
     }
+
 
     this.loading.set(true);
 

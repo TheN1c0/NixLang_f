@@ -56,13 +56,64 @@
             type="text" 
             class="translation-input input-active"
             [value]="translationAnswer()"
-            (input)="onTextChange($event)"
+            (input)="onTranslationChange($event)"
             placeholder="Escribe tu respuesta en inglés..."
             (keyup.enter)="verify()"
             aria-label="Respuesta de traducción" />
         }
       </div>
     }
+
+    <!-- 3. FILL IN THE BLANK INTERFACE -->
+    @else if (exercise.type === 'FillInTheBlank') {
+      <div class="fill-blank-box">
+        @if (statementSegments().hasInlineBlank) {
+          <div class="inline-sentence-card">
+            <span class="sentence-chunk">{{ statementSegments().before }}</span>
+            
+            @if (result) {
+              <span 
+                class="blank-inline-badge" 
+                [class.blank-correct]="result.isCorrect"
+                [class.blank-incorrect]="!result.isCorrect">
+                {{ result.givenAnswer || '(sin respuesta)' }}
+              </span>
+            } @else {
+              <input 
+                type="text" 
+                class="blank-inline-input"
+                [value]="blankAnswer()"
+                (input)="onBlankChange($event)"
+                placeholder="completa..."
+                (keyup.enter)="verify()"
+                aria-label="Palabra faltante" />
+            }
+
+            <span class="sentence-chunk">{{ statementSegments().after }}</span>
+          </div>
+        } @else {
+          @if (result) {
+            <input 
+              type="text" 
+              class="translation-input"
+              [class.input-correct]="result.isCorrect"
+              [class.input-incorrect]="!result.isCorrect"
+              [value]="result.givenAnswer"
+              disabled />
+          } @else {
+            <input 
+              type="text" 
+              class="translation-input input-active"
+              [value]="blankAnswer()"
+              (input)="onBlankChange($event)"
+              placeholder="Escribe la palabra faltante..."
+              (keyup.enter)="verify()"
+              aria-label="Palabra para completar espacio" />
+          }
+        }
+      </div>
+    }
+
 
   </div>
 

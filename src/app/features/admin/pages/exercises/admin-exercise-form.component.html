@@ -50,19 +50,32 @@
             <span class="type-desc">El estudiante traduce la frase escrita al inglés escribiendo texto libre.</span>
           </div>
         </label>
+
+        <label class="type-option-card" [class.selected-type]="type === 'FillInTheBlank'">
+          <input 
+            type="radio" 
+            name="exerciseType" 
+            value="FillInTheBlank" 
+            [(ngModel)]="type" 
+            [disabled]="editMode()" />
+          <div class="type-details">
+            <span class="type-title">Completar Espacios</span>
+            <span class="type-desc">El estudiante completa la palabra faltante en una oración (usa '___' en el enunciado).</span>
+          </div>
+        </label>
       </div>
     </div>
 
     <!-- Statement Input -->
     <div class="form-group">
-      <label for="statement" class="form-label">Enunciado / Pregunta (en español)</label>
+      <label for="statement" class="form-label">Enunciado / Pregunta (en inglés o español)</label>
       <input 
         type="text" 
         id="statement" 
         name="statement" 
         class="form-control" 
         [(ngModel)]="statement" 
-        placeholder="Ej: ¿Cómo se dice 'Buenos días' en inglés?" 
+        placeholder="Ej: She ___ to school yesterday. o ¿Cómo se dice 'Hola'?" 
         required 
         autocomplete="off" />
     </div>
@@ -96,6 +109,24 @@
         <span class="form-help">La validación se realiza sin distinguir entre mayúsculas y minúsculas.</span>
       </div>
     }
+
+    <!-- CONDITIONAL RENDER: FILL IN THE BLANK CORRECT ANSWER -->
+    @if (type === 'FillInTheBlank') {
+      <div class="form-group">
+        <label for="blankCorrectAnswer" class="form-label">Palabra o Frase Faltante (Respuesta Correcta)</label>
+        <input 
+          type="text" 
+          id="blankCorrectAnswer" 
+          name="blankCorrectAnswer" 
+          class="form-control" 
+          [(ngModel)]="correctAnswer" 
+          placeholder="Ej: went" 
+          required 
+          autocomplete="off" />
+        <span class="form-help">Tip: Escribe la oración en el enunciado usando <strong>___</strong> (ej: <em>She ___ to school yesterday</em>).</span>
+      </div>
+    }
+
 
     <!-- CONDITIONAL RENDER: MULTIPLE CHOICE ALTERNATIVES -->
     @if (type === 'MultipleChoice') {
